@@ -31,8 +31,6 @@ namespace Flow.Launcher.Plugin.Kummer
      *    
      *  TO DO
      *  -----
-     *    - Move into settings
-     *        - Command(s) to be executed for shutdown for home, shutdown for work (will include path to exe and all parameters, mac address, etc)
      *    - Add validation to the settings, making sure all are populated with reasonable values
      *    - Add UI for settings
     */
@@ -52,19 +50,10 @@ namespace Flow.Launcher.Plugin.Kummer
         private Dictionary<string, string> _keywordTitleMappings = new Dictionary<string, string>();
         private List<Result> _commands = new List<Result>();
         private Dictionary<HTTP_CLIENT_ENUMS, HttpClient> _httpClients = new Dictionary<HTTP_CLIENT_ENUMS, HttpClient>();
-        private bool _homeComputer = Environment.GetEnvironmentVariable("COMPUTERNAME") == Environment.GetEnvironmentVariable("USERDOMAIN");
+        private readonly List<ProcessStartInfo> _homeShutdownCommands = new();
+        private readonly List<ProcessStartInfo> _workShutdownCommands = new();
 
-        private readonly List<ProcessStartInfo> HOME_SHUTDOWN_COMMANDS = new()
-        {
-            new ProcessStartInfo("btcom.exe", "-r -b \"38:5C:76:2E:5E:82\" -s111e"),
-            new ProcessStartInfo("btcom.exe", "-r -b \"38:5C:76:2E:5E:82\" -s110b"),
-            new ProcessStartInfo("radiocontrol.exe", "bluetooth OFF"),
-            new ProcessStartInfo("\"C:\\Program Files\\NirCmd\\nircmdc.exe\"", "cmdwait 5000 monitor off")
-        };
-        private readonly List<ProcessStartInfo> WORK_SHUTDOWN_COMMANDS = new()
-        {
-            new ProcessStartInfo("shutdown", "/s /t 0")
-        };
+        private bool _homeComputer = Environment.GetEnvironmentVariable("COMPUTERNAME") == Environment.GetEnvironmentVariable("USERDOMAIN");
 
 
         /*
@@ -77,9 +66,22 @@ namespace Flow.Launcher.Plugin.Kummer
             _context = context;
             _settings = context.API.LoadSettingJsonStorage<Settings>();
 
+            // Build HTTP clients
             _httpClients.Add(HTTP_CLIENT_ENUMS.SLACK_HOME, CreateHttpClient(_settings.SlackTokenHome));
             _httpClients.Add(HTTP_CLIENT_ENUMS.SLACK_WORK, CreateHttpClient(_settings.SlackTokenWork));
             _httpClients.Add(HTTP_CLIENT_ENUMS.HOME_ASSISTANT, CreateHttpClient(_settings.HomeAssistantToken));
+
+            // Create shutdown objects
+            _settings.HomeShutdownCommands.ForEach(c =>
+            {
+                var parts = c.Split('|');
+                _homeShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+            });
+            _settings.WorkShutdownCommands.ForEach(c =>
+            {
+                var parts = c.Split('|');
+                _workShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+            });
         }
 
 
@@ -257,7 +259,7 @@ namespace Flow.Launcher.Plugin.Kummer
 
                             if (_homeComputer)
                             {
-                                HOME_SHUTDOWN_COMMANDS.ForEach(psi =>
+                                _homeShutdownCommands.ForEach(psi =>
                                 {
                                     _context.API.LogInfo("Main.cs", $"Executing >>> {psi.FileName} {psi.Arguments}", "HOME_SHUTDOWN_COMMANDS");
 
@@ -267,7 +269,7 @@ namespace Flow.Launcher.Plugin.Kummer
                                 });
                             } else
                             {
-                                WORK_SHUTDOWN_COMMANDS.ForEach(psi =>
+                                _workShutdownCommands.ForEach(psi =>
                                 {
                                     _context.API.LogInfo("Main.cs", $"Executing >>> {psi.FileName} {psi.Arguments}", "WORK_SHUTDOWN_COMMANDS");
 

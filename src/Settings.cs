@@ -22,23 +22,11 @@ namespace Flow.Launcher.Plugin.Kummer
         [JsonPropertyName("home_assistant_token")]
         public string HomeAssistantToken { get; set; } = "";
 
-        /*
-        private readonly List<ProcessStartInfo> HOME_SHUTDOWN_COMMANDS = new()
-        {
-            new ProcessStartInfo("btcom.exe", "-r -b \"38:5C:76:2E:5E:82\" -s111e"),
-            new ProcessStartInfo("btcom.exe", "-r -b \"38:5C:76:2E:5E:82\" -s110b"),
-            new ProcessStartInfo("radiocontrol.exe", "bluetooth OFF"),
-            new ProcessStartInfo("\"C:\\Program Files\\NirCmd\\nircmdc.exe\"", "cmdwait 5000 monitor off")
-        };
-        private readonly List<ProcessStartInfo> WORK_SHUTDOWN_COMMANDS = new()
-        {
-            new ProcessStartInfo("shutdown", "/s /t 0")
-        };
-        */
+        [JsonPropertyName("home_shutdown_commands")]
+        public List<string> HomeShutdownCommands{ get; set; } = new();
 
-
-
-
+        [JsonPropertyName("work_shutdown_commands")]
+        public List<string> WorkShutdownCommands { get; set; } = new();
 
 
 
