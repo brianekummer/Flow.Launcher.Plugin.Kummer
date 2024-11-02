@@ -1,0 +1,1 @@
+This is my Flow Launcher plugin for stuff specific to me, like running my Home Assistant scenes, changing Slack status, etc.

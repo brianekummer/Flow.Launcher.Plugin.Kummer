@@ -1,0 +1,12 @@
+{
+  "ID": "b1f1162e-8ba9-4d8d-b88a-1c60addcfc39",
+  "ActionKeyword": "k",
+  "Name": "Kummer",
+  "Description": "All sorts of stuff specific to Brian Kummer",
+  "Author": "Brian Kummer",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/Flow-Launcher/plugin-samples",
+  "ExecuteFileName": "Flow.Launcher.Plugin.Kummer.dll",
+  "IcoPath": "Images\\app.png"
+}
