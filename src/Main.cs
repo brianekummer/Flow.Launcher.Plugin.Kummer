@@ -6,7 +6,6 @@ using System.IO;
 
 
 
-using Flow.Launcher.Infrastructure;
 using Control = System.Windows.Controls.Control;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -28,11 +27,14 @@ namespace Flow.Launcher.Plugin.Kummer
      *  Notes
      *  -----
      *    - Because API secret is read when the plugin starts, any change to that requires the plugin to be restarted
+     *    - Doing this because my employer's IT has my work laptop locked down and it sometimes prompted me asking if
+     *      it should run some batch files, so I pulled everything into this plugin.
      *    
      *  TO DO
      *  -----
      *    - Add validation to the settings, making sure all are populated with reasonable values
      *    - Add UI for settings
+     *    - Can I remove Newtonsoft package?
     */
     public partial class Main : IPlugin, ISettingProvider, IPluginI18n     //, ISavable
     {
@@ -154,8 +156,8 @@ namespace Flow.Launcher.Plugin.Kummer
             _commands.ForEach(c => {
                 c.Title = GetDynamicTitle(query, c);
 
-                var titleMatch = StringMatcher.FuzzySearch(query.Search, c.Title);
-                var subTitleMatch = StringMatcher.FuzzySearch(query.Search, c.SubTitle);
+                var titleMatch = _context.API.FuzzySearch(query.Search, c.Title);
+                var subTitleMatch = _context.API.FuzzySearch(query.Search, c.SubTitle);
 
                 var score = Math.Max(titleMatch.Score, subTitleMatch.Score);
                 if (score > 0)
@@ -194,8 +196,8 @@ namespace Flow.Launcher.Plugin.Kummer
                 return result.Title;
             }
 
-            var englishTitleMatch = StringMatcher.FuzzySearch(query.Search, result.Title);
-            var translatedTitleMatch = StringMatcher.FuzzySearch(query.Search, translatedTitle);
+            var englishTitleMatch = _context.API.FuzzySearch(query.Search, result.Title);
+            var translatedTitleMatch = _context.API.FuzzySearch(query.Search, translatedTitle);
 
             return englishTitleMatch.Score >= translatedTitleMatch.Score ? result.Title : translatedTitle;
         }
@@ -232,6 +234,7 @@ namespace Flow.Launcher.Plugin.Kummer
                 },
             };
         }
+
 
         /*
          *  Get the Flow Launcher commands that are available for this plugin
@@ -345,7 +348,6 @@ namespace Flow.Launcher.Plugin.Kummer
         */
 
 
-
         /*
          *  Handle an error. Definitely shows an error message, and logs the exception if that information is provided.
          *  
@@ -402,6 +404,7 @@ namespace Flow.Launcher.Plugin.Kummer
             var httpIndex = homeComputer ? HTTP_CLIENT_ENUMS.SLACK_HOME : HTTP_CLIENT_ENUMS.SLACK_WORK;
             await _httpClients[httpIndex].PostAsync(url, new StringContent(""));
         }
+
 
         /*
          *  Set my Slack status

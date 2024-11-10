@@ -25,7 +25,7 @@
     <!--  Command Descriptions  -->
     <system:String x:Key="flowlauncher_plugin_kummer_air_purifier_toggle">Toggle the office air purifier</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_fan_toggle">Toggle the office fan</system:String>
-    <system:String x:Key="flowlauncher_plugin_kummer_exit_office">Exit the office, turning off fans, lights, etc.</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_exit_office">Exit the office, turning off all devices</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_monitor_lights_off">Turn the office monitor lights off</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_nighttime">Set the office lights to nightime</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_cold">Office is cold; turn off the fans</system:String>
