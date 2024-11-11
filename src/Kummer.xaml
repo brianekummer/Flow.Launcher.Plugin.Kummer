@@ -4,31 +4,34 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="479.63" d:DesignWidth="800"
              DataContext="{Binding Path=Settings, RelativeSource={RelativeSource Self}}">
     <Grid Margin="10" VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="43*" />
             <RowDefinition Height="43*" />
             <RowDefinition Height="43*" />
-            <RowDefinition Height="37*" />
-            <RowDefinition Height="80*" />
-            <RowDefinition Height="31*" />
-            <RowDefinition Height="31*" />
+            <RowDefinition Height="43*" />
+            <RowDefinition Height="120*" />
+            <RowDefinition Height="120*" />
+            <RowDefinition Height="43*" />
+            <RowDefinition Height="43*" />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="Slack Home Token" Margin="0,10,0,6"></Label>
-        <TextBox Grid.Row="0" Text="{Binding SlackTokenHome}" Margin="174,1,0,19" HorizontalAlignment="Left" Width="438" />
+        <TextBox Grid.Row="0" Text="{Binding SlackTokenHome}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
         <Label Grid.Row="1" Content="Slack Work Token" Margin="0,10,0,6"></Label>
-        <TextBox Grid.Row="1" Text="{Binding SlackTokenWork}" Margin="174,1,0,19" HorizontalAlignment="Left" Width="438" />
+        <TextBox Grid.Row="1" Text="{Binding SlackTokenWork}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
         <Label Grid.Row="2" Content="Home Assistant URL" Margin="0,10,0,6"></Label>
-        <TextBox Grid.Row="2" Text="{Binding HomeAssistantUrl}" Margin="174,1,0,19" HorizontalAlignment="Left" Width="438" />
+        <TextBox Grid.Row="2" Text="{Binding HomeAssistantUrl}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
         <Label Grid.Row="3" Content="Home Assistant Token" Margin="0,10,0,6"></Label>
-        <TextBox Grid.Row="3" Text="{Binding HomeAssistantToken}" Margin="174,1,0,19" HorizontalAlignment="Left" Width="438" />
+        <TextBox Grid.Row="3" Text="{Binding HomeAssistantToken}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
 
-        <Label Grid.Row="4" Content="Home Shutdown Commands" Margin="0,10,0,6"></Label>
-        <TextBox Grid.Row="4" Text="{Binding HomeShutdownCommands}" Margin="174,2,0,17" HorizontalAlignment="Left" Width="438" Height="80" />
+        <Label Grid.Row="4" Content="Home Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
+        <TextBox Grid.Row="4" Text="{Binding HomeShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
 
+        <Label Grid.Row="5" Content="Work Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
+        <TextBox Grid.Row="5" Text="{Binding WorkShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
 
-        <Label Grid.Row="5" Content="You need to restart Flow Launcher to apply the changes." FontWeight="Bold" Margin="0,148,0,-177" Grid.RowSpan="2"></Label>
+        <Label Grid.Row="7" Content="You need to restart Flow Launcher to apply the changes." FontWeight="Bold" Margin="0,34,0,-63"></Label>
     </Grid>
 </UserControl>

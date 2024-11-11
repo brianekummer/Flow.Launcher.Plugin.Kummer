@@ -23,10 +23,10 @@ namespace Flow.Launcher.Plugin.Kummer
         public string HomeAssistantToken { get; set; } = "";
 
         [JsonPropertyName("home_shutdown_commands")]
-        public List<string> HomeShutdownCommands{ get; set; } = new();
+        public string HomeShutdownCommands { get; set; } = "";
 
         [JsonPropertyName("work_shutdown_commands")]
-        public List<string> WorkShutdownCommands { get; set; } = new();
+        public string WorkShutdownCommands { get; set; } = "";
 
 
 

@@ -13,6 +13,8 @@ using System.Text;
 using static System.Net.WebRequestMethods;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Policy;
 
 
 
@@ -34,6 +36,7 @@ namespace Flow.Launcher.Plugin.Kummer
      *  -----
      *    - Add validation to the settings, making sure all are populated with reasonable values
      *    - Add UI for settings
+     *    - Test making changes to settings in UI
      *    - Can I remove Newtonsoft package?
     */
     public partial class Main : IPlugin, ISettingProvider, IPluginI18n     //, ISavable
@@ -74,15 +77,27 @@ namespace Flow.Launcher.Plugin.Kummer
             _httpClients.Add(HTTP_CLIENT_ENUMS.HOME_ASSISTANT, CreateHttpClient(_settings.HomeAssistantToken));
 
             // Create shutdown objects
-            _settings.HomeShutdownCommands.ForEach(c =>
+            //_context.API.LogInfo("Main.cs", $"_settings.HomeShutdownCommands = {_settings.HomeShutdownCommands}", "Init");
+            _settings.HomeShutdownCommands.Split(new string[] { "\n" }, StringSplitOptions.None).ToList().ForEach(c =>
             {
-                var parts = c.Split('|');
-                _homeShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+                if (c.Trim().Length > 0)
+                {
+                    //_context.API.LogInfo("Main.cs", $">>> c = {c}", "Init");
+                    var parts = c.Split('|');
+                    //_context.API.LogInfo("Main.cs", $">>> c => {parts[0]} | {parts[1]}", "Init");
+                    _homeShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+                }
             });
-            _settings.WorkShutdownCommands.ForEach(c =>
+            //_context.API.LogInfo("Main.cs", $"_settings.WorkShutdownCommands = {_settings.WorkShutdownCommands}", "Init");
+            _settings.WorkShutdownCommands.Split(new string[] { "\n" }, StringSplitOptions.None).ToList().ForEach(c =>
             {
-                var parts = c.Split('|');
-                _workShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+                if (c.Trim().Length > 0)
+                {
+                    //_context.API.LogInfo("Main.cs", $">>> c = {c}", "Init");
+                    var parts = c.Split('|');
+                    //_context.API.LogInfo("Main.cs", $">>> c => {parts[0]} | {parts[1]}", "Init");
+                    _workShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
+                }
             });
         }
 
