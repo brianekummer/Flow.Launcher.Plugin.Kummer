@@ -2,19 +2,14 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.IO;
-
-
 
 using Control = System.Windows.Controls.Control;
 using System.Reflection;
-using Newtonsoft.Json;
 using System.Text;
-using static System.Net.WebRequestMethods;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Policy;
+using System.Text.RegularExpressions;
 
 
 
@@ -28,18 +23,15 @@ namespace Flow.Launcher.Plugin.Kummer
      *
      *  Notes
      *  -----
-     *    - Because API secret is read when the plugin starts, any change to that requires the plugin to be restarted
-     *    - Doing this because my employer's IT has my work laptop locked down and it sometimes prompted me asking if
-     *      it should run some batch files, so I pulled everything into this plugin.
+     *    - Because settings are read when the plugin starts, any change requires the plugin to be restarted
+     *    - Doing this because my employer's IT has my work laptop locked down and it sometimes prompts me for approval
+     *      to run some batch files, so I pulled everything into this plugin.
      *    
      *  TO DO
      *  -----
      *    - Add validation to the settings, making sure all are populated with reasonable values
-     *    - Add UI for settings
-     *    - Test making changes to settings in UI
-     *    - Can I remove Newtonsoft package?
     */
-    public partial class Main : IPlugin, ISettingProvider, IPluginI18n     //, ISavable
+    public partial class Main : IPlugin, ISettingProvider, IPluginI18n
     {
         private const string PLUGIN_KEY_PREFIX = "flowlauncher_plugin_kummer";
 
@@ -52,11 +44,10 @@ namespace Flow.Launcher.Plugin.Kummer
 
         internal PluginInitContext _context;
         private Settings _settings;
-        private Dictionary<string, string> _keywordTitleMappings = new Dictionary<string, string>();
-        private List<Result> _commands = new List<Result>();
-        private Dictionary<HTTP_CLIENT_ENUMS, HttpClient> _httpClients = new Dictionary<HTTP_CLIENT_ENUMS, HttpClient>();
-        private readonly List<ProcessStartInfo> _homeShutdownCommands = new();
-        private readonly List<ProcessStartInfo> _workShutdownCommands = new();
+        private Dictionary<string, string> _keywordTitleMappings = new();
+        private List<Result> _commands = new();
+        private Dictionary<HTTP_CLIENT_ENUMS, HttpClient> _httpClients = new();
+        private List<ProcessStartInfo> _shutdownCommands = new();
 
         private bool _homeComputer = Environment.GetEnvironmentVariable("COMPUTERNAME") == Environment.GetEnvironmentVariable("USERDOMAIN");
 
@@ -77,28 +68,7 @@ namespace Flow.Launcher.Plugin.Kummer
             _httpClients.Add(HTTP_CLIENT_ENUMS.HOME_ASSISTANT, CreateHttpClient(_settings.HomeAssistantToken));
 
             // Create shutdown objects
-            //_context.API.LogInfo("Main.cs", $"_settings.HomeShutdownCommands = {_settings.HomeShutdownCommands}", "Init");
-            _settings.HomeShutdownCommands.Split(new string[] { "\n" }, StringSplitOptions.None).ToList().ForEach(c =>
-            {
-                if (c.Trim().Length > 0)
-                {
-                    //_context.API.LogInfo("Main.cs", $">>> c = {c}", "Init");
-                    var parts = c.Split('|');
-                    //_context.API.LogInfo("Main.cs", $">>> c => {parts[0]} | {parts[1]}", "Init");
-                    _homeShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
-                }
-            });
-            //_context.API.LogInfo("Main.cs", $"_settings.WorkShutdownCommands = {_settings.WorkShutdownCommands}", "Init");
-            _settings.WorkShutdownCommands.Split(new string[] { "\n" }, StringSplitOptions.None).ToList().ForEach(c =>
-            {
-                if (c.Trim().Length > 0)
-                {
-                    //_context.API.LogInfo("Main.cs", $">>> c = {c}", "Init");
-                    var parts = c.Split('|');
-                    //_context.API.LogInfo("Main.cs", $">>> c => {parts[0]} | {parts[1]}", "Init");
-                    _workShutdownCommands.Add(new ProcessStartInfo(parts[0], parts[1]));
-                }
-            });
+            _shutdownCommands = BuildShutdownCommands(_homeComputer ? _settings.HomeShutdownCommands : _settings.WorkShutdownCommands);
         }
 
 
@@ -109,7 +79,7 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private HttpClient CreateHttpClient(string bearerToken)
         {
-            var httpClient = new HttpClient();
+            HttpClient httpClient = new();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
             return httpClient;
         }
@@ -119,12 +89,11 @@ namespace Flow.Launcher.Plugin.Kummer
          *  Initialize the plugin, stage 2
          *  
          *  I cannot do these steps in Init() because GetTranslation() doesn't work - it returns
-         *  "No Translation for key xxxxx". I don't know why, and I cannot find any FlowLauncher plugin that uses
-         *  GetTranslation() in it's Init() as an example.
-         *
-         *  So I will set it here, if it's not already set, and call it from Query()
-         *
-         *  Using IAsyncPlugin doesn't solve this problem.
+         *  "No Translation for key xxxxx". 
+         *    - I don't know why, and I cannot find any FlowLauncher plugin that uses GetTranslation() in its
+         *      Init() as an example.
+         *    - So I will set it here, if it's not already set, and call this from Query()
+         *    - Using IAsyncPlugin doesn't solve this problem.
          */
         private void InitStage2()
         {
@@ -158,6 +127,38 @@ namespace Flow.Launcher.Plugin.Kummer
 
 
         /*
+         *  Build the list of shutdown commands
+         *  
+         *  @param shutdownCommandsString - List of CRLF-delimited commands to parse into a list of ProcessStartInfo objects can actually be run
+         *  @returns a list of ProcessStartInfo objects
+         */
+        private List<ProcessStartInfo> BuildShutdownCommands(String shutdownCommandsString)
+        {
+            // Find the first space character that is outside of any optional double-quotes
+            Regex rexeg = new Regex("(?:\"([^\"]*)\"|([^\"\\s]+))");
+            List<ProcessStartInfo> shutdownCommands = new();
+
+            shutdownCommandsString.Split(new string[] { "\n" }, StringSplitOptions.None).ToList().ForEach(shutdownCommand =>
+            {
+                shutdownCommand = shutdownCommand.Trim();
+                if (shutdownCommand.Length > 0)
+                {
+                    Match match = rexeg.Match(shutdownCommand);
+                    if (match.Groups[0].Success)
+                    {
+                        var cmd = match.Groups[0].Value;
+                        var args = (cmd.Length < shutdownCommand.Length) ? shutdownCommand.Substring(match.Groups[0].Length + 1) : "";
+                        //_context.API.LogInfo("Main.cs", $">>>>> {cmd} >>> {args}", "BuildShutdownCommands");
+                        shutdownCommands.Add(new ProcessStartInfo(cmd, args));
+                    }
+                }
+            });
+
+            return shutdownCommands;
+        }
+
+
+        /*
         *  Execute a query from Flow Launcher
         *  
         *  @param query - The query to execute
@@ -166,7 +167,7 @@ namespace Flow.Launcher.Plugin.Kummer
         {
             InitStage2();
 
-            var results = new List<Result>();
+            List<Result> results = new();
 
             _commands.ForEach(c => {
                 c.Title = GetDynamicTitle(query, c);
@@ -204,7 +205,7 @@ namespace Flow.Launcher.Plugin.Kummer
                 return "Title Not Found";
             }
 
-            var translatedTitle = _context.API.GetTranslation(translationKey);
+            string translatedTitle = _context.API.GetTranslation(translationKey);
 
             if (result.Title == translatedTitle)
             {
@@ -233,9 +234,6 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private Result buildHomeAssistantSceneResult(string subkey, string service, string entityId)
         {
-            // assumes
-            //   Values of title and subtitle are same except title appends _cmd
-            //   icon is named as key.png
             return new Result
             {
                 Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_{subkey}_cmd"),
@@ -258,7 +256,7 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private List<Result> getCommands()
         {
-            var results = new List<Result>();
+            List<Result> results = new();
             results.AddRange(new[]
             {   
                 new Result
@@ -275,27 +273,15 @@ namespace Flow.Launcher.Plugin.Kummer
                             setSlackStatus(_homeComputer, "", "");
                             executeHomeAssistantCommand("turn_on", "script.office_exit");
 
-                            if (_homeComputer)
-                            {
-                                _homeShutdownCommands.ForEach(psi =>
+                            _shutdownCommands.ForEach(psi =>
                                 {
-                                    _context.API.LogInfo("Main.cs", $"Executing >>> {psi.FileName} {psi.Arguments}", "HOME_SHUTDOWN_COMMANDS");
-
+                                    //_context.API.LogInfo("Main.cs", $"Executing >>> {psi.FileName} {psi.Arguments}", $"_{(_homeComputer ? "home" : "work")}ShutdownCommands");
                                     psi.UseShellExecute = true;
                                     psi.WindowStyle = ProcessWindowStyle.Hidden;
                                     Process.Start(psi).WaitForExit();
                                 });
-                            } else
-                            {
-                                _workShutdownCommands.ForEach(psi =>
-                                {
-                                    _context.API.LogInfo("Main.cs", $"Executing >>> {psi.FileName} {psi.Arguments}", "WORK_SHUTDOWN_COMMANDS");
 
-                                    psi.UseShellExecute = true;
-                                    psi.WindowStyle = ProcessWindowStyle.Hidden;
-                                    Process.Start(psi).WaitForExit();
-                                });
-                            }
+
                         });
 
                         return true;
@@ -309,8 +295,8 @@ namespace Flow.Launcher.Plugin.Kummer
                 buildHomeAssistantSceneResult("office_hot", "turn_on", "script.office_hot"),
                 buildHomeAssistantSceneResult("office_lights_daylight", "turn_on", "script.office_lights_to_daylight"),
                 buildHomeAssistantSceneResult("office_lights_neutral", "turn_on", "script.office_lights_to_neutral"),
-                buildHomeAssistantSceneResult("office_lights_off", "turn_on", "script.office_lights_to_off"),
                 buildHomeAssistantSceneResult("office_lights_warm", "turn_on", "script.office_lights_to_warm"),
+                buildHomeAssistantSceneResult("office_lights_off", "turn_on", "script.office_lights_off"),
                 buildHomeAssistantSceneResult("outside_bright", "turn_on", "script.office_outside_bright"),
                 buildHomeAssistantSceneResult("outside_overcast", "turn_on", "script.office_outside_overcast"),
                 buildHomeAssistantSceneResult("outside_dark", "turn_on", "script.office_outside_dark"),
@@ -319,48 +305,6 @@ namespace Flow.Launcher.Plugin.Kummer
 
             return results;
         }
-
-
-        /*
-         *  Get the API secret/access token from the plugin's settings file and displays an error message if the API 
-         *  secret is not found
-         *
-         *  @returns - The API secret, or null if the settings file doesn't exist
-         */
-        /*
-        private Settings getSettings()
-        {
-            var configFile = Environment.ExpandEnvironmentVariables(@"%APPDATA%\FlowLauncher\Settings\Plugins\Flow.Launcher.Plugin.Kummer\Settings.json");
-            Settings settings = new Settings(); 
-
-            try
-            {
-                if (System.IO.File.Exists(configFile))
-                {
-                    //settings = JsonSerializer.Deserialize<Settings>(File.OpenRead(configFile));
-                    // TODO- validate that this works.
-                    using (StreamReader reader = new StreamReader(configFile))
-                    {
-                        string json = reader.ReadToEnd();
-                        _context.API.LogInfo("Main.cs", $"json = {json}", "getSettings");
-                        settings = JsonConvert.DeserializeObject<Settings>(json);
-                    }
-                }
-                settings.ConfigFile = configFile;
-
-                //if (string.IsNullOrEmpty(settings.SlackTokens))
-                //{
-                //    handleError("Task was not created because could not find the API secret.", $"Slack tokens is empty", new ArgumentNullException("slackTokens"), "Main.cs", "getSettings");
-                //}
-            }
-            catch (Exception ex)
-            {
-                handleError("Task was not created because could not find the API secret.", $"Exception getting Slack Tokens from {configFile}", ex, "Main.cs", "getSettings");
-            }
-
-            return settings;
-        }
-        */
 
 
         /*
@@ -393,11 +337,11 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private async void executeHomeAssistantCommand(string service, string entityId)
         {
-            var domain = entityId.Split('.')[0];
-            var url = $"{_settings.HomeAssistantUrl}/api/services/{domain}/{service}";
-            var requestData = $"{{\"entity_id\":\"{entityId}\"}}";
+            string domain = entityId.Split('.')[0];
+            string url = $"{_settings.HomeAssistantUrl}/api/services/{domain}/{service}";
+            string requestData = $"{{\"entity_id\":\"{entityId}\"}}";
 
-            _context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "executeHACommand");
+            //_context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "executeHACommand");
             await _httpClients[HTTP_CLIENT_ENUMS.HOME_ASSISTANT].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/json"));
         }
 
@@ -412,9 +356,9 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private async void setSlackPresence(bool homeComputer, string presence)
         {
-            var url = $"https://slack.com/api/users.setPresence?presence={presence}";
+            string url = $"https://slack.com/api/users.setPresence?presence={presence}";
 
-            _context.API.LogInfo("Main.cs", $"Posting to {url}", "setSlackPresence");
+            //_context.API.LogInfo("Main.cs", $"Posting to {url}", "setSlackPresence");
 
             var httpIndex = homeComputer ? HTTP_CLIENT_ENUMS.SLACK_HOME : HTTP_CLIENT_ENUMS.SLACK_WORK;
             await _httpClients[httpIndex].PostAsync(url, new StringContent(""));
@@ -435,10 +379,10 @@ namespace Flow.Launcher.Plugin.Kummer
          */
         private async void setSlackStatus(bool homeComputer, string emoji, string statusText)
         {
-            var url = "https://slack.com/api/users.profile.set";
-            var requestData = $"profile={{'status_emoji':'{emoji}','status_text':'{statusText}'}}";
+            string url = "https://slack.com/api/users.profile.set";
+            string requestData = $"profile={{'status_emoji':'{emoji}','status_text':'{statusText}'}}";
 
-            _context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "setSlackStatus");
+            //_context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "setSlackStatus");
 
             var httpIndex = homeComputer ? HTTP_CLIENT_ENUMS.SLACK_HOME : HTTP_CLIENT_ENUMS.SLACK_WORK;
             await _httpClients[httpIndex].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/x-www-form-urlencoded"));
@@ -449,7 +393,6 @@ namespace Flow.Launcher.Plugin.Kummer
          *  These functions are required by ISavable to display and save settings
          */
         public Control CreateSettingPanel() => new KummerSettings(_settings);
-        //public void Save() => _settings?.Save();
 
 
         /*
