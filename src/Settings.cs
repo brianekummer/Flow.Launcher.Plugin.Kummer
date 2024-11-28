@@ -1,15 +1,11 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Flow.Launcher.Plugin.Kummer
 {
     public class Settings
     {
-        public string ConfigFile = null!;
-
         [JsonPropertyName("slack_token_home")]
         public string SlackTokenHome { get; set; } = "";
 
@@ -29,14 +25,28 @@ namespace Flow.Launcher.Plugin.Kummer
         public string WorkShutdownCommands { get; set; } = "";
 
 
-
-
-
-        /*
-        public void Save()
+        public List<string> Validate()
         {
-            //File.WriteAllText(ConfigFile, JsonSerializer.Serialize(this));
+            List<string> validationErrors = new();
+
+            if (SlackTokenHome == null || SlackTokenHome.Length == 0)
+                validationErrors.Add("Slack Token Home cannot be empty");
+            if (SlackTokenWork == null || SlackTokenWork.Length == 0)
+                validationErrors.Add("Slack Token Work cannot be empty");
+            if (HomeAssistantUrl == null || !Uri.IsWellFormedUriString(HomeAssistantUrl, UriKind.RelativeOrAbsolute))
+                validationErrors.Add("Home Assistant Url is either empty or invalid");
+            if (HomeAssistantToken == null || HomeAssistantToken.Length == 0)
+                validationErrors.Add("Slack Token Work cannot be empty");
+            if (HomeShutdownCommands != null && HomeShutdownCommands.Length > 0)
+            {
+                // TODO- Validate HomeShutdownCommands
+            }
+            if (WorkShutdownCommands != null && WorkShutdownCommands.Length > 0)
+            {
+                // TODO- Validate WorkShutdownCommands
+            }
+
+            return validationErrors;
         }
-        */
     }
 }
