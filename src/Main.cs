@@ -26,10 +26,6 @@ namespace Flow.Launcher.Plugin.Kummer
      *  Notes
      *  -----
      *    - Because settings are read when the plugin starts, any change to a setting requires the plugin to be restarted
-     *    
-     *  TO DO
-     *  -----
-     *    - Add validation to the settings HomeShutdownCommands and WorkShutdownCommands
     */
     public partial class Main : IPlugin, ISettingProvider, IPluginI18n
     {
@@ -154,7 +150,6 @@ namespace Flow.Launcher.Plugin.Kummer
                     {
                         string cmd = match.Groups[0].Value;
                         string args = (cmd.Length < shutdownCommand.Length) ? shutdownCommand.Substring(match.Groups[0].Length + 1) : "";
-                        //_context.API.LogInfo("Main.cs", $">>>>> {cmd} >>> {args}", "BuildShutdownCommands");
                         shutdownCommands.Add(new ProcessStartInfo(cmd, args));
                     }
                 }
@@ -183,7 +178,6 @@ namespace Flow.Launcher.Plugin.Kummer
             {
                 Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_{subkey}_cmd"),
                 SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_{subkey}"),
-                //Glyph = null,
                 IcoPath = $"Images\\{subkey}.png",
                 Action = c =>
                 {
@@ -208,7 +202,6 @@ namespace Flow.Launcher.Plugin.Kummer
                 {
                     Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office_cmd"),
                     SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office"),
-                    //Glyph = null,
                     IcoPath = "Images\\exit-office.png",
                     Action = c =>
                     {
@@ -265,7 +258,6 @@ namespace Flow.Launcher.Plugin.Kummer
             string url = $"{_settings.HomeAssistantUrl}/api/services/{domain}/{service}";
             string requestData = $"{{\"entity_id\":\"{entityId}\"}}";
 
-            //_context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "executeHACommand");
             await _httpClients[HTTP_CLIENT_ENUMS.HOME_ASSISTANT].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/json"));
         }
 
@@ -279,7 +271,6 @@ namespace Flow.Launcher.Plugin.Kummer
         {
             string url = $"https://slack.com/api/users.setPresence?presence={presence}";
             
-            //_context.API.LogInfo("Main.cs", $"Posting to {url}", "setSlackPresence");
             await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(""));
         }
 
@@ -298,7 +289,6 @@ namespace Flow.Launcher.Plugin.Kummer
             string url = "https://slack.com/api/users.profile.set";
             string requestData = $"profile={{'status_emoji':'{emoji}','status_text':'{statusText}'}}";
 
-            //_context.API.LogInfo("Main.cs", $"Posting to {url} with {requestData}", "setSlackStatus");
             await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/x-www-form-urlencoded"));
         }
 

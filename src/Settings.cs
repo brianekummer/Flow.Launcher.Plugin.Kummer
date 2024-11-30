@@ -37,14 +37,8 @@ namespace Flow.Launcher.Plugin.Kummer
                 validationErrors.Add("Home Assistant Url is either empty or invalid");
             if (HomeAssistantToken == null || HomeAssistantToken.Length == 0)
                 validationErrors.Add("Slack Token Work cannot be empty");
-            if (HomeShutdownCommands != null && HomeShutdownCommands.Length > 0)
-            {
-                // TODO- Validate HomeShutdownCommands
-            }
-            if (WorkShutdownCommands != null && WorkShutdownCommands.Length > 0)
-            {
-                // TODO- Validate WorkShutdownCommands
-            }
+            
+            // There is no validation I can do on the shutdown commands. 
 
             return validationErrors;
         }
