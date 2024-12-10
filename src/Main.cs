@@ -197,33 +197,8 @@ namespace Flow.Launcher.Plugin.Kummer
         {
             List<Result> results = new();
             results.AddRange(new[]
-            {   
-                new Result
-                {
-                    Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office_cmd"),
-                    SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office"),
-                    IcoPath = "Images\\exit-office.png",
-                    Action = c =>
-                    {
-                        // Run this async so Flow Launcher can immediately return control to the user
-                        Task.Run(() => {
-                            SetSlackPresence("away");
-                            SetSlackStatus("", "");
-                            ExecuteHomeAssistantCommand("turn_on", "script.office_exit");
-
-                            _shutdownCommands.ForEach(psi =>
-                                {
-                                    psi.UseShellExecute = true;
-                                    psi.WindowStyle = ProcessWindowStyle.Hidden;
-                                    Process.Start(psi).WaitForExit();
-                                });
-
-
-                        });
-
-                        return true;
-                    },
-                },
+            {
+                BuildExitOfficeResult(),
                 BuildHomeAssistantSceneResult("air_purifier_toggle", "turn_on", "script.office_air_purifier_toggle"),
                 BuildHomeAssistantSceneResult("fan_toggle", "toggle", "switch.office_small_fan"),
                 BuildHomeAssistantSceneResult("monitor_lights_off", "turn_off", "light.monitor_lights"),
@@ -241,6 +216,44 @@ namespace Flow.Launcher.Plugin.Kummer
 
             return results;
         }
+
+
+        /*
+         *  Builds the Result for exiting my office
+         * 
+         *  @returns a Result object for existing my office
+         */ 
+        private Result BuildExitOfficeResult()
+        {
+            return new Result
+            {
+                Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office_cmd"),
+                SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office"),
+                IcoPath = "Images\\exit-office.png",
+                Action = c =>
+                {
+                    Task.Run(() =>
+                    {
+                        SetSlackPresence("away");
+                        SetSlackStatus("", "");
+                        ExecuteHomeAssistantCommand("turn_on", "script.office_exit");
+
+                        _shutdownCommands.ForEach(psi =>
+                        {
+                            psi.UseShellExecute = true;
+                            psi.WindowStyle = ProcessWindowStyle.Hidden;
+                            Process.Start(psi).WaitForExit();
+                        });
+                    });
+
+                    return true;
+                },
+            };
+        }
+
+
+
+
 
 
         /*

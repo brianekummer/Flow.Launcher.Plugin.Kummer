@@ -38,7 +38,7 @@ namespace Flow.Launcher.Plugin.Kummer
             if (HomeAssistantToken == null || HomeAssistantToken.Length == 0)
                 validationErrors.Add("Slack Token Work cannot be empty");
             
-            // There is no validation I can do on the shutdown commands. 
+            // There is no validation I can do on the shutdown commands 
 
             return validationErrors;
         }
