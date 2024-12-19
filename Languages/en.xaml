@@ -8,6 +8,8 @@
     <system:String x:Key="flowlauncher_plugin_kummer_desc">Description</system:String>
 
     <system:String x:Key="flowlauncher_plugin_kummer_air_purifier_toggle_cmd">Toggle office air purifier</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_bluetooth_off_cmd">BT off</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_bluetooth_on_cmd">BT on</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_fan_toggle_cmd">Toggle office fan</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_exit_office_cmd">Exit office</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_monitor_lights_off_cmd">Monitor lights off</system:String>
@@ -24,6 +26,8 @@
     
     <!--  Command Descriptions  -->
     <system:String x:Key="flowlauncher_plugin_kummer_air_purifier_toggle">Toggle the office air purifier</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_bluetooth_off">Turn Bluetooth off</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_bluetooth_on">Turn Bluetooth on</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_fan_toggle">Toggle the office fan</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_exit_office">Exit the office, turning off all devices</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_monitor_lights_off">Turn the office monitor lights off</system:String>

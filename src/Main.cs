@@ -104,6 +104,8 @@ namespace Flow.Launcher.Plugin.Kummer
                 new List<string>()
                 {
                     $"{PLUGIN_KEY_PREFIX}_air_purifier_toggle_cmd",
+                    $"{PLUGIN_KEY_PREFIX}_bluetooth_off_cmd",
+                    $"{PLUGIN_KEY_PREFIX}_bluetooth_on_cmd",
                     $"{PLUGIN_KEY_PREFIX}_fan_toggle_cmd",
                     $"{PLUGIN_KEY_PREFIX}_exit_office_cmd",
                     $"{PLUGIN_KEY_PREFIX}_monitor_lights_off_cmd",
@@ -199,6 +201,8 @@ namespace Flow.Launcher.Plugin.Kummer
             results.AddRange(new[]
             {
                 BuildExitOfficeResult(),
+                BuildBluetoothResult("off"),
+                BuildBluetoothResult("on"),
                 BuildHomeAssistantSceneResult("air_purifier_toggle", "turn_on", "script.office_air_purifier_toggle"),
                 BuildHomeAssistantSceneResult("fan_toggle", "toggle", "switch.office_small_fan"),
                 BuildHomeAssistantSceneResult("monitor_lights_off", "turn_off", "light.monitor_lights"),
@@ -229,7 +233,7 @@ namespace Flow.Launcher.Plugin.Kummer
             {
                 Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office_cmd"),
                 SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_exit_office"),
-                IcoPath = "Images\\exit-office.png",
+                IcoPath = "Images\\exit_office.png",
                 Action = c =>
                 {
                     Task.Run(() =>
@@ -252,8 +256,33 @@ namespace Flow.Launcher.Plugin.Kummer
         }
 
 
+        /*
+         *  Builds the Result for turning Bluetooth on or off
+         * 
+         *  @param onOff - on|off
+         *
+         *  @returns a Result object for turning bluetooth on or off
+         */
+        private Result BuildBluetoothResult(string onOff)
+        {
+            return new Result
+            {
+                Title = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_bluetooth_{onOff}_cmd"),
+                SubTitle = _context.API.GetTranslation($"{PLUGIN_KEY_PREFIX}_bluetooth_{onOff}"),
+                IcoPath = $"Images\\bluetooth_{onOff}.png",
+                Action = c =>
+                {
+                    Task.Run(() =>
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo("radiocontrol.exe", $"bluetooth {onOff}");
+                        psi.UseShellExecute = false;
+                        Process.Start(psi);
+                    });
 
-
+                    return true;
+                },
+            };
+        }
 
 
         /*
