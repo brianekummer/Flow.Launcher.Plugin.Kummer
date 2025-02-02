@@ -21,17 +21,19 @@
         <TextBox Grid.Row="0" Text="{Binding SlackTokenHome}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
         <Label Grid.Row="1" Content="Slack Work Token" Margin="0,10,0,6"></Label>
         <TextBox Grid.Row="1" Text="{Binding SlackTokenWork}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
-        <Label Grid.Row="2" Content="Home Assistant URL" Margin="0,10,0,6"></Label>
+        <Label Grid.Row="2" Content="Home Assistant Base URL" Margin="0,10,0,6"></Label>
         <TextBox Grid.Row="2" Text="{Binding HomeAssistantUrl}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
         <Label Grid.Row="3" Content="Home Assistant Token" Margin="0,10,0,6"></Label>
         <TextBox Grid.Row="3" Text="{Binding HomeAssistantToken}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
+        <Label Grid.Row="4" Content="Work Status Server Base URL" Margin="0,10,0,6"></Label>
+        <TextBox Grid.Row="4" Text="{Binding WorkStatusServerUrl}" Margin="195,1,0,19" HorizontalAlignment="Left" Width="438" />
 
-        <Label Grid.Row="4" Content="Home Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
-        <TextBox Grid.Row="4" Text="{Binding HomeShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
+        <Label Grid.Row="5" Content="Home Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
+        <TextBox Grid.Row="5" Text="{Binding HomeShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
 
-        <Label Grid.Row="5" Content="Work Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
-        <TextBox Grid.Row="5" Text="{Binding WorkShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
+        <Label Grid.Row="6" Content="Work Shutdown Commands" Margin="0,10,0,-45" Grid.RowSpan="4"></Label>
+        <TextBox Grid.Row="6" Text="{Binding WorkShutdownCommands}" Margin="195,0,0,19" HorizontalAlignment="Left" Width="438" Height="120" />
 
-        <Label Grid.Row="7" Content="You need to restart Flow Launcher to apply the changes." FontWeight="Bold" Margin="0,34,0,-63"></Label>
+        <Label Grid.Row="8" Content="You need to restart Flow Launcher to apply the changes." FontWeight="Bold" Margin="0,34,0,-63"></Label>
     </Grid>
 </UserControl>

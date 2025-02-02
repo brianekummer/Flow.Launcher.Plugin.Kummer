@@ -34,7 +34,8 @@ namespace Flow.Launcher.Plugin.Kummer
         private enum HTTP_CLIENT_ENUMS
         {
             SLACK = 1,
-            HOME_ASSISTANT = 2
+            HOME_ASSISTANT = 2,
+            WORK_STATUS_SERVER = 3
         }
 
         internal PluginInitContext _context;
@@ -68,6 +69,7 @@ namespace Flow.Launcher.Plugin.Kummer
             // Build HTTP clients
             _httpClients.Add(HTTP_CLIENT_ENUMS.SLACK, CreateHttpClient(_isHomeComputer ? _settings.SlackTokenHome : _settings.SlackTokenWork));
             _httpClients.Add(HTTP_CLIENT_ENUMS.HOME_ASSISTANT, CreateHttpClient(_settings.HomeAssistantToken));
+            _httpClients.Add(HTTP_CLIENT_ENUMS.WORK_STATUS_SERVER, new HttpClient());   // No auth here
 
             // Build list of shutdown commands
             _shutdownCommands = BuildShutdownCommands(_isHomeComputer ? _settings.HomeShutdownCommands : _settings.WorkShutdownCommands);
@@ -240,6 +242,7 @@ namespace Flow.Launcher.Plugin.Kummer
                     {
                         SetSlackPresence("away");
                         SetSlackStatus("", "");
+                        TellWorkStatusServerMyStatusChanged();
                         ExecuteHomeAssistantCommand("turn_on", "script.office_exit");
 
                         _shutdownCommands.ForEach(psi =>
@@ -334,6 +337,18 @@ namespace Flow.Launcher.Plugin.Kummer
             await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/x-www-form-urlencoded"));
         }
 
+
+        /*
+         * Tell My Work Status Server that I've changed my Slack status
+         */
+        private async void TellWorkStatusServerMyStatusChanged()
+        {
+            if (_settings.WorkStatusServerUrl != "")
+            {
+                string url = $"{_settings.WorkStatusServerUrl}/api/updated-slack-status";
+                await _httpClients[HTTP_CLIENT_ENUMS.WORK_STATUS_SERVER].PostAsync(url, new StringContent(""));
+            }
+        }
 
 
         #region Plugin Infrastructure

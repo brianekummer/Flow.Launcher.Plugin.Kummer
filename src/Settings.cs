@@ -12,6 +12,9 @@ namespace Flow.Launcher.Plugin.Kummer
         [JsonPropertyName("slack_token_work")]
         public string SlackTokenWork { get; set; } = "";
 
+        [JsonPropertyName("work_status_server_url")]
+        public string WorkStatusServerUrl { get; set; } = "";
+
         [JsonPropertyName("home_assistant_url")]
         public string HomeAssistantUrl { get; set; } = "";
 
@@ -36,7 +39,7 @@ namespace Flow.Launcher.Plugin.Kummer
             if (HomeAssistantUrl == null || !Uri.IsWellFormedUriString(HomeAssistantUrl, UriKind.RelativeOrAbsolute))
                 validationErrors.Add("Home Assistant Url is either empty or invalid");
             if (HomeAssistantToken == null || HomeAssistantToken.Length == 0)
-                validationErrors.Add("Slack Token Work cannot be empty");
+                validationErrors.Add("Home Assistant Token cannot be empty");
             
             // There is no validation I can do on the shutdown commands 
 
