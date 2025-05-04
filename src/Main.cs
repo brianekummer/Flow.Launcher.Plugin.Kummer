@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
 
 
 
@@ -303,7 +304,15 @@ namespace Flow.Launcher.Plugin.Kummer
             string url = $"{_settings.HomeAssistantUrl}/api/services/{domain}/{service}";
             string requestData = $"{{\"entity_id\":\"{entityId}\"}}";
 
-            await _httpClients[HTTP_CLIENT_ENUMS.HOME_ASSISTANT].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/json"));
+            try
+            {
+                await _httpClients[HTTP_CLIENT_ENUMS.HOME_ASSISTANT].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/json"));
+            }
+            catch (Exception ex)
+            {
+                MethodBase m = MethodBase.GetCurrentMethod();
+                HandleError("Unable to execute Home Assistant command", $"Unable to execute Home Assistant command", ex, m.ReflectedType.Name, m.Name);
+            }
         }
 
 
@@ -316,7 +325,15 @@ namespace Flow.Launcher.Plugin.Kummer
         {
             string url = $"https://slack.com/api/users.setPresence?presence={presence}";
             
-            await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(""));
+            try
+            {
+                await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(""));
+            }
+            catch (Exception ex)
+            {
+                MethodBase m = MethodBase.GetCurrentMethod();
+                HandleError("Unable to set Slack Presence", $"Unable to set Slack Presence", ex, m.ReflectedType.Name, m.Name);
+            }
         }
 
 
@@ -334,7 +351,15 @@ namespace Flow.Launcher.Plugin.Kummer
             string url = "https://slack.com/api/users.profile.set";
             string requestData = $"profile={{'status_emoji':'{emoji}','status_text':'{statusText}'}}";
 
-            await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/x-www-form-urlencoded"));
+            try
+            {
+                await _httpClients[HTTP_CLIENT_ENUMS.SLACK].PostAsync(url, new StringContent(requestData, Encoding.UTF8, "application/x-www-form-urlencoded"));
+            }
+            catch (Exception ex)
+            {
+                MethodBase m = MethodBase.GetCurrentMethod();
+                HandleError("Unable to set Slack Status", $"Unable to set Slack Status", ex, m.ReflectedType.Name, m.Name);
+            }
         }
 
 
@@ -346,7 +371,16 @@ namespace Flow.Launcher.Plugin.Kummer
             if (_settings.WorkStatusServerUrl != "")
             {
                 string url = $"{_settings.WorkStatusServerUrl}/api/updated-slack-status";
-                await _httpClients[HTTP_CLIENT_ENUMS.WORK_STATUS_SERVER].PostAsync(url, new StringContent(""));
+
+                try
+                {
+                    await _httpClients[HTTP_CLIENT_ENUMS.WORK_STATUS_SERVER].PostAsync(url, new StringContent(""));
+                }
+                catch (Exception ex)
+                {
+                    MethodBase m = MethodBase.GetCurrentMethod();
+                    HandleError("Unable to notify work status server", $"Unable to notify work status server of a status change", ex, m.ReflectedType.Name, m.Name);
+                }
             }
         }
 
