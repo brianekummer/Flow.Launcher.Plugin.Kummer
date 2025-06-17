@@ -4,7 +4,7 @@
   "Name": "Kummer",
   "Description": "All sorts of stuff specific to Brian Kummer",
   "Author": "Brian Kummer",
-  "Version": "1.0.0",
+  "Version": "1.0.1",
   "Language": "csharp",
   "Website": "https://github.com/Flow-Launcher/plugin-samples",
   "ExecuteFileName": "Flow.Launcher.Plugin.Kummer.dll",

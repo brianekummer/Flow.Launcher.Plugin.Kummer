@@ -15,6 +15,7 @@
     <system:String x:Key="flowlauncher_plugin_kummer_monitor_lights_off_cmd">Monitor lights off</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_nighttime_cmd">Nighttime</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_cold_cmd">Office is cold</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_office_warm_cmd">Office is warm</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_hot_cmd">Office is hot</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_lights_daylight_cmd">Office lights to daylight</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_lights_neutral_cmd">Office lights to neutral</system:String>
@@ -32,8 +33,9 @@
     <system:String x:Key="flowlauncher_plugin_kummer_exit_office">Exit the office, turning off all devices</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_monitor_lights_off">Turn the office monitor lights off</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_nighttime">Set the office lights to nightime</system:String>
-    <system:String x:Key="flowlauncher_plugin_kummer_office_cold">Office is cold; turn off the fans</system:String>
-    <system:String x:Key="flowlauncher_plugin_kummer_office_hot">Office is hot; turn on the fans</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_office_cold">Office is cold; turn off all the fans</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_office_warm">Office is warm; turn on a fan</system:String>
+    <system:String x:Key="flowlauncher_plugin_kummer_office_hot">Office is hot; turn on all the fans</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_lights_daylight">Set the office lights to daylight</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_lights_neutral">Set the office lights to neutral</system:String>
     <system:String x:Key="flowlauncher_plugin_kummer_office_lights_warm">Set the office lights to warm</system:String>
